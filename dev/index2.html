@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Tool Gallery - Space Theme</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(ellipse at center, #0d0d1a 0%, #000010 80%);
+      color: #e0e0ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #121229cc;
+      padding: 25px 40px;
+      box-shadow: 0 0 15px #551A8BAA;
+      text-align: center;
+      font-weight: 900;
+      font-size: 28px;
+      letter-spacing: 2px;
+      color: #aa99ff;
+      text-shadow: 0 0 10px #aa99ff88, 0 0 20px #aabbffcc;
+      user-select: none;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+    }
+
+    .card {
+      background: linear-gradient(135deg, #1c1c3a, #0f0f22);
+      border-radius: 16px;
+      box-shadow:
+        0 0 15px 2px #7044ff99,
+        inset 0 0 20px #4b3ca699;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      color: #d1d0ff;
+      user-select: none;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow:
+        0 0 25px 5px #a179ffcc,
+        inset 0 0 25px #7f63ffcc;
+    }
+
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      filter: brightness(0.85);
+      border-bottom: 1px solid #4b3ca6cc;
+      transition: filter 0.3s ease;
+    }
+
+    .card:hover img {
+      filter: brightness(1);
+    }
+
+    .card-content {
+      padding: 20px 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      text-shadow: 0 0 6px #9f80ffbb;
+      color: #c8bfff;
+    }
+
+    .card-desc {
+      font-size: 15px;
+      flex: 1;
+      color: #b0aaffcc;
+      line-height: 1.5;
+      margin-bottom: 18px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-demo {
+      align-self: flex-start;
+      background: #7c61ff;
+      background: linear-gradient(45deg, #7c61ff, #a08cff);
+      border: none;
+      color: white;
+      padding: 11px 24px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      font-size: 15px;
+      box-shadow: 0 0 10px #8f7bffcc;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .btn-demo:hover {
+      background: #a08cff;
+      box-shadow: 0 0 18px #c1b3ffdd;
+    }
+
+    footer {
+      background: #121229cc;
+      padding: 16px 20px;
+      text-align: center;
+      color: #6e66aa;
+      font-size: 14px;
+      margin-top: auto;
+      user-select: none;
+    }
+
+    @media (max-width: 480px) {
+      header {
+        font-size: 22px;
+        padding: 18px 10px;
+      }
+
+      .card img {
+        height: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    My Tool Gallery - Space Theme
+  </header>
+
+  <main id="gallery">
+    <!-- Cards sẽ được JS tạo -->
+  </main>
+
+  <footer>
+    © 2025 Trung Tran - Portfolio Gallery
+  </footer>
+
+  <script>
+    // Mảng dữ liệu tools
+    const tools = [
+      {
+        title: "Máy Tính Tiền Điện",
+        desc: "Tính tiền điện theo bậc thang, có biểu đồ minh họa.",
+        img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
+        link: "/electricity-calculator/index.html"
+      },
+      {
+        title: "Chuyển Đổi Đơn Vị",
+        desc: "Công cụ chuyển đổi đơn vị đo lường phổ biến.",
+        img: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80",
+        link: "#"
+      },
+      {
+        title: "Bộ Đếm Thời Gian",
+        desc: "Đếm ngược hoặc bấm giờ đơn giản dễ dùng.",
+        img: "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=400&q=80",
+        link: "#"
+      },
+      {
+        title: "Máy Tính BMI",
+        desc: "Tính chỉ số BMI để đánh giá sức khỏe.",
+        img: "https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=400&q=80",
+        link: "#"
+      }
+    ];
+
+    const gallery = document.getElementById('gallery');
+    function handleDemoClick(event, link) {
+        if (link && link !== "#") {
+            window.location.href = link;
+        } else {
+            event.preventDefault();
+            alert('Demo tool: ${tool.title}')
+        }
+    }
+
+    tools.forEach(tool => {
+      const card = document.createElement('article');
+      card.className = 'card';
+
+      card.innerHTML = `
+        <img src="${tool.img}" alt="${tool.title}" />
+        <div class="card-content">
+          <h3 class="card-title">${tool.title}</h3>
+          <p class="card-desc">${tool.desc}</p>
+          <a href="${tool.link}" class="btn-demo" onclick="handleDemoClick(event, '${tool.link}')">Demo</a>
+        </div>
+      `;
+
+      gallery.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>

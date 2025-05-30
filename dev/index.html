@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tool Gallery</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-bottom: 1rem;
+        }
+
+        .card button {
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            border: none;
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            width: fit-content;
+            align-self: flex-start;
+        }
+
+        footer {
+            margin-top: 4rem;
+            font-size: 0.85rem;
+            opacity: 0.5;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .card {
+                /* max-width: 100%; */
+                width: 100%;
+            }
+
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🚀 Bộ công cụ Web Tool</h1>
+
+    <div class="gallery">
+        <div class="card">
+            <h2>💡 Tính tiền điện</h2>
+            <p>Tính chi phí điện theo bậc thang 6 cấp và tuỳ chỉnh giá từng bậc.</p>
+            <a href="/tools/electricity-calculator.html" target="_blank">
+                <button>Dùng ngay</button>
+            </a>
+        </div>
+
+        <div class="card">
+            <h2>📏 Máy tính BMI</h2>
+            <p>Tính chỉ số BMI và phân loại cơ thể theo tiêu chuẩn WHO.</p>
+            <a href="/tools/bmi-calculator.html" target="_blank">
+                <button>Dùng ngay</button>
+            </a>
+        </div>
+
+        <!-- Bạn có thể thêm nhiều tool ở đây -->
+    </div>
+
+    <footer>© 2025 - Bộ sưu tập tool cá nhân</footer>
+</body>
+
+</html>

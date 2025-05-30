@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Tool Gallery</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #fff;
+      padding: 20px 40px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      text-align: center;
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: 1.2px;
+      color: #333;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 6px 20px rgb(0 0 0 / 0.15);
+    }
+
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: #ddd;
+    }
+
+    .card-content {
+      padding: 16px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #222;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      flex: 1;
+      color: #555;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .btn-demo {
+      align-self: flex-start;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .btn-demo:hover {
+      background-color: #0056b3;
+    }
+
+    footer {
+      background: #f1f1f1;
+      padding: 12px 20px;
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+      margin-top: auto;
+    }
+
+    @media (max-width: 480px) {
+      header {
+        font-size: 20px;
+        padding: 15px 10px;
+      }
+
+      .card img {
+        height: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    My Tool Gallery
+  </header>
+
+  <main id="gallery">
+    <!-- Cards sẽ được JS tạo -->
+  </main>
+
+  <footer>
+    © 2025 Trung Tran - Portfolio Gallery
+  </footer>
+
+  <script>
+    // Mảng dữ liệu tools
+    const tools = [
+      {
+        title: "Máy Tính Tiền Điện",
+        desc: "Tính tiền điện theo bậc thang, có biểu đồ minh họa.",
+        img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
+        link: "/electricity-calculator/index.html"
+      },
+      {
+        title: "Chuyển Đổi Đơn Vị",
+        desc: "Công cụ chuyển đổi đơn vị đo lường phổ biến.",
+        img: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80",
+        link: "#"
+      },
+      {
+        title: "Bộ Đếm Thời Gian",
+        desc: "Đếm ngược hoặc bấm giờ đơn giản dễ dùng.",
+        img: "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=400&q=80",
+        link: "#"
+      },
+      {
+        title: "Máy Tính BMI",
+        desc: "Tính chỉ số BMI để đánh giá sức khỏe.",
+        img: "https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=400&q=80",
+        link: "#"
+      }
+    ];
+
+    const gallery = document.getElementById('gallery');
+    function handleDemoClick(event, link) {
+        if (link && link !== "#") {
+            window.location.href = link;
+        } else {
+            event.preventDefault();
+            alert('Demo tool: ${tool.title}')
+        }
+    }
+    tools.forEach(tool => {
+      const card = document.createElement('article');
+      card.className = 'card';
+
+      card.innerHTML = `
+        <img src="${tool.img}" alt="${tool.title}" />
+        <div class="card-content">
+          <h3 class="card-title">${tool.title}</h3>
+          <p class="card-desc">${tool.desc}</p>
+          <a href="${tool.link}" class="btn-demo" onclick="handleDemoClick(event, '${tool.link}')">Demo</a>
+        </div>
+      `;
+
+      gallery.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>

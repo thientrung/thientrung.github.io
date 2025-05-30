@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Máy Tính Tiền Điện</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+            flex-wrap: wrap;
+        }
+
+        .main,
+        .settings {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h2,
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 12px;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            /* margin-top: 16px; */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.setting {
+            background-color: transparent;
+            /* color: white; */
+            border: none;
+            cursor: pointer;
+            /* margin-bottom: 8px; */
+            width: 50px;
+        }
+
+        button.setting:hover {
+            background-color: #a1a9b1;
+        }
+
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 12px;
+        }
+
+        .details table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .details th,
+        .details td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .settings {
+            display: none;
+        }
+
+        .settings.active {
+            display: block;
+        }
+
+        .toggle-settings {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            float: right;
+        }
+
+        .output-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .output-left,
+        .output-right {
+            flex: 1;
+            min-width: 300px;
+            max-height: 500px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .output-container {
+                flex-direction: column;
+            }
+
+            .toggle-settings {
+                float: none;
+                display: block;
+                margin: 0 auto 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="main">
+            <button class="toggle-settings setting" onclick="toggleSettings()" title="Cài đặt">&#9881;</button>
+            <h2>Máy Tính Tiền Điện</h2>
+
+            <label for="numkWh">Nhập số điện (kWh):</label>
+            <input type="number" id="numkWh" placeholder="VD: 250" />
+
+            <button onclick="calculate()">Tính tiền điện</button>
+
+            <div class="output-container">
+                <div class="output-left">
+                    <div class="result" id="result"></div>
+                    <div class="details" id="details"></div>
+                </div>
+                <div class="output-right chart-container">
+                    <canvas id="chart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings" id="settingSection">
+            <h3>Cài đặt giá điện theo bậc</h3>
+            <div id="settingInputs"></div>
+            <button onclick="resetDefaults()">Khôi phục mặc định</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chart;
+        let defaultelectricLevel = [
+            { label: "Bậc 1 (0-50)", limit: 50, price: 1806 },
+            { label: "Bậc 2 (51-100)", limit: 100, price: 1866 },
+            { label: "Bậc 3 (101-200)", limit: 200, price: 2167 },
+            { label: "Bậc 4 (201-300)", limit: 300, price: 2729 },
+            { label: "Bậc 5 (301-400)", limit: 400, price: 3050 },
+            { label: "Bậc 6 (>400)", limit: Infinity, price: 3151 },
+        ];
+
+        let electricLevel = JSON.parse(JSON.stringify(defaultelectricLevel));
+        function renderSettings() {
+            const div = document.getElementById('settingInputs');
+            div.innerHTML = '';
+            electricLevel.forEach((b, index) => {
+                div.innerHTML += `
+          <label>${b.label} - Giá (đ/kWh):</label>
+          <input type="number" id="price-${index}" value="${b.price}" onchange="updateGia(${index})" />
+        `;
+            });
+        }
+
+        function updateGia(index) {
+            const val = parseInt(document.getElementById(`price-${index}`).value);
+            if (!isNaN(val) && val > 0) {
+                electricLevel[index].price = val;
+            }
+        }
+
+        function resetDefaults() {
+            electricLevel = JSON.parse(JSON.stringify(defaultelectricLevel));
+            renderSettings();
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingSection').classList.toggle('active');
+        }
+
+        function calculate() {
+            const numkWh = parseInt(document.getElementById("numkWh").value);
+            const result = document.getElementById("result");
+            const details = document.getElementById("details");
+
+            if (isNaN(numkWh) || numkWh < 0) {
+                result.textContent = "Vui lòng nhập số điện hợp lệ.";
+                details.innerHTML = "";
+                return;
+            }
+
+            let totalCost = 0;
+            let calculated = 0;
+            let detailsLevel = [];
+
+            for (let i = 0; i < electricLevel.length; i++) {
+                const level = electricLevel[i];
+                if (level.limit == Infinity || !level.limit) {
+                    level.limit = numkWh;
+                }
+                let levelUsage = Math.min(numkWh, level.limit) - calculated;
+                if (levelUsage > 0) {
+                    const cost = levelUsage * level.price;
+                    totalCost += cost;
+                    calculated += levelUsage;
+                    detailsLevel.push({ ...level, numkWh: levelUsage, cost });
+                }
+                if (calculated >= numkWh) break;
+            }
+
+            result.textContent = `Tổng tiền điện: ${totalCost.toLocaleString()} đồng`;
+
+            let html = `
+        <table>
+          <tr>
+            <th>Bậc</th>
+            <th>Số kWh</th>
+            <th>Giá (đ/kWh)</th>
+            <th>Thành tiền (đ)</th>
+          </tr>`;
+            detailsLevel.forEach(b => {
+                html += `
+          <tr>
+            <td>${b.label}</td>
+            <td>${b.numkWh}</td>
+            <td>${b.price.toLocaleString()}</td>
+            <td>${b.cost.toLocaleString()}</td>
+          </tr>`;
+            });
+            html += `</table>`;
+            details.innerHTML = html;
+
+
+
+
+            veBieuDo(detailsLevel);
+        }
+
+        function veBieuDo(data) {
+            const ctx = document.getElementById('chart').getContext('2d');
+            const labels = data.map(b => b.label);
+            const values = data.map(b => b.numkWh);
+
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Số kWh theo bậc',
+                        data: values,
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.parsed.y} kWh`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Số kWh' }
+                        }
+                    }
+                }
+            });
+        }
+
+        renderSettings();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Máy Tính Tiền Điện</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      /* min-height: 100vh; */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    .calculator {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin: 2rem;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      flex: 1;
+      border: none;
+      border-radius: 0.5rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    .setting-toggle {
+      float: right;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .settings {
+      display: none;
+      margin-top: 1rem;
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .settings input {
+      width: 6rem;
+    }
+
+    .results-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .results, .chart-container {
+      flex: 1;
+    }
+
+    @media (min-width: 768px) {
+      .results-container {
+        flex-direction: row;
+      }
+    }
+
+    canvas {
+      background-color: rgba(255,255,255,0.05);
+      border-radius: 1rem;
+      padding: 1rem;
+      color: white;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h1>🔌 Máy Tính Tiền Điện</h1>
+    <div class="input-group">
+        <input type="number" id="electricity" placeholder="Nhập số điện (kWh)" />
+        <button onclick="calculate()">Tính</button>
+        <span class="setting-toggle" onclick="toggleSettings()">⚙️</span>
+    </div>
+
+    <div class="settings" id="settings">
+      <h3>Cài đặt giá điện</h3>
+      <div id="price-settings"></div>
+    </div>
+
+    <div class="results-container">
+      <div class="results" id="results"></div>
+      <div class="chart-container">
+        <canvas id="chart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const levels = [
+      { from: 0, to: 50, price: 1806 },
+      { from: 51, to: 100, price: 1866 },
+      { from: 101, to: 200, price: 2167 },
+      { from: 201, to: 300, price: 2729 },
+      { from: 301, to: 400, price: 3050 },
+      { from: 401, to: Infinity, price: 3151 }
+    ];
+
+    const priceSettingsContainer = document.getElementById("price-settings");
+
+    levels.forEach((level, i) => {
+      const label = document.createElement("label");
+      label.innerHTML = `Bậc ${i+1} (${level.from} - ${level.to === Infinity ? "∞" : level.to} kWh): 
+        <input type="number" value="${level.price}" onchange="updatePrice(${i}, this.value)" /> đồng/kWh`;
+      priceSettingsContainer.appendChild(label);
+      priceSettingsContainer.appendChild(document.createElement("br"));
+    });
+
+    function toggleSettings() {
+      const settings = document.getElementById("settings");
+      settings.style.display = settings.style.display === "block" ? "none" : "block";
+    }
+
+    function updatePrice(index, value) {
+      levels[index].price = parseInt(value);
+    }
+
+    function calculate() {
+      const input = document.getElementById("electricity").value;
+      const kwh = parseInt(input);
+      if (isNaN(kwh) || kwh < 0) return alert("Vui lòng nhập số điện hợp lệ");
+
+      let total = 0, remaining = kwh;
+      let details = [];
+      let labels = [], data = [];
+
+      for (let lvl of levels) {
+        if (remaining <= 0) break;
+        const used = Math.min(lvl.to - lvl.from + 1, remaining);
+        const cost = used * lvl.price;
+        details.push(`<p>Bậc ${levels.indexOf(lvl)+1}: ${used} kWh × ${lvl.price} = ${cost.toLocaleString()} đ</p>`);
+        total += cost;
+        labels.push(`Bậc ${levels.indexOf(lvl)+1}`);
+        data.push(cost);
+        remaining -= used;
+      }
+
+      document.getElementById("results").innerHTML = `
+        ${details.join("")}
+        <h3>Tổng cộng: ${total.toLocaleString()} đ</h3>
+      `;
+
+      drawChart(labels, data);
+    }
+
+    function drawChart(labels, data) {
+    document.getElementById("chart").style.display = "block";
+      const ctx = document.getElementById("chart").getContext("2d");
+      if (window.barChart) window.barChart.destroy();
+      window.barChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Chi phí theo bậc",
+            data: data,
+            backgroundColor: "#00c6ff"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

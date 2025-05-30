@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧮 Tính tiền điện</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 1000px;
+      width: 100%;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    label, input, button {
+      font-size: 1rem;
+    }
+
+    input {
+      padding: 0.6rem;
+      border-radius: 0.5rem;
+      border: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 0.5rem;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .result-table th, .result-table td {
+      border: 1px solid #ffffff33;
+      padding: 0.5rem 1rem;
+      text-align: left;
+    }
+
+    .result-table th {
+      background-color: #0f2027;
+    }
+
+    .setting-toggle {
+      background: transparent;
+      border: none;
+      color: #00c6ff;
+      cursor: pointer;
+      font-size: 1rem;
+      align-self: flex-end;
+      margin-top: -1rem;
+    }
+
+    .settings {
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .settings input {
+      max-width: 150px;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .content {
+        flex-direction: row;
+      }
+
+      .result, .chart {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔌 Máy tính tiền điện</h1>
+  <div class="container">
+    <button class="setting-toggle" onclick="toggleSettings()">⚙️ Cài đặt giá điện</button>
+    <div class="settings" id="settings"></div>
+
+    <label for="usage">Nhập số kWh đã dùng:</label>
+    <input type="number" id="usage" placeholder="VD: 350">
+    <button onclick="calculateElectricityCost()">Tính tiền</button>
+
+    <div class="content">
+      <div class="result" id="result">👉 Nhập số điện để tính toán.</div>
+      <div class="chart"><canvas id="costChart"></canvas></div>
+    </div>
+  </div>
+
+  <script>
+    const tiers = [
+      { limit: 50, price: 1806 },
+      { limit: 100, price: 1866 },
+      { limit: 200, price: 2167 },
+      { limit: 300, price: 2729 },
+      { limit: 400, price: 3050 },
+      { limit: Infinity, price: 3151 },
+    ];
+
+    function renderSettings() {
+      const settingsDiv = document.getElementById("settings");
+      settingsDiv.innerHTML = "";
+      tiers.forEach((tier, index) => {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.value = tier.price;
+        input.addEventListener("input", (e) => {
+          tiers[index].price = parseInt(e.target.value);
+        });
+        settingsDiv.appendChild(document.createTextNode(`Bậc ${index + 1} (≤ ${tier.limit === Infinity ? '∞' : tier.limit} kWh): `));
+        settingsDiv.appendChild(input);
+        settingsDiv.appendChild(document.createElement("br"));
+      });
+    }
+
+    function toggleSettings() {
+      const s = document.getElementById("settings");
+      s.style.display = s.style.display === "none" || s.style.display === "" ? "flex" : "none";
+    }
+
+    function calculateElectricityCost() {
+      const usage = parseInt(document.getElementById("usage").value);
+      if (isNaN(usage) || usage < 0) return;
+
+      let remaining = usage;
+      let total = 0;
+      let lastLimit = 0;
+      let rows = "<h3>Kết quả:</h3><table class='result-table'><tr><th>Bậc</th><th>kWh</th><th>Giá (đ/kWh)</th><th>Thành tiền (đ)</th></tr>";
+
+      const chartLabels = [];
+      const chartData = [];
+
+      for (let i = 0; i < tiers.length; i++) {
+        const tier = tiers[i];
+        const tierUsage = Math.min(remaining, tier.limit - lastLimit);
+        const tierCost = tierUsage * tier.price;
+
+        if (tierUsage > 0) {
+          rows += `<tr><td>${i + 1}</td><td>${tierUsage}</td><td>${tier.price}</td><td>${tierCost.toLocaleString()}</td></tr>`;
+          chartLabels.push(`Bậc ${i + 1}`);
+          chartData.push(tierCost);
+          total += tierCost;
+          remaining -= tierUsage;
+          lastLimit = tier.limit;
+        }
+        if (remaining <= 0) break;
+      }
+
+      rows += `</table><p><strong>Tổng tiền: ${total.toLocaleString()} đ</strong></p>`;
+      document.getElementById("result").innerHTML = rows;
+
+      const ctx = document.getElementById('costChart').getContext('2d');
+      if (window.costChart instanceof Chart) window.costChart.destroy();
+      window.costChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Chi phí theo bậc',
+            data: chartData,
+            backgroundColor: '#00c6ff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            y: {
+              ticks: { color: 'white' },
+              grid: { color: '#ffffff22' }
+            },
+            x: {
+              ticks: { color: 'white' },
+              grid: { color: '#ffffff22' }
+            }
+          }
+        }
+      });
+    }
+
+    renderSettings();
+  </script>
+</body>
+</html>
